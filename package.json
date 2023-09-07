@@ -3,10 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "tsc --build",
-    "worker1": "ts-node src/workerV1.ts",
-    "worker2": "ts-node src/workerV2.ts",
-    "worker21": "ts-node src/workerV21.ts",
+    "build": "tsc --build && node lib/create-bundle.js",
+    "worker": "ts-node src/worker.ts",
     "sender": "ts-node src/client.ts",
     "finisher": "ts-node src/client-finish.ts"
   },
