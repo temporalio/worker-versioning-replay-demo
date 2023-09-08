@@ -32,23 +32,24 @@ jobs:
   release-validation:
     if: ${{ github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, '[compatible-')  }}
     runs-on: ubuntu-latest
+    env:
+      TEMPORAL_CLIENT_CERT: ${{ secrets.TEMPORAL_CLIENT_CERT }}
+      TEMPORAL_CLIENT_KEY: ${{ secrets.TEMPORAL_CLIENT_KEY }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 20
-      - run: npm ci
-      - run: npm run build
-      - name: Create certs dir
-        # We write the certs to disk because it serves the sample
-        run: |
-          mkdirs /tmp/temporal-certs
-          echo -n $TEMPORAL_CLIENT_CERT > /tmp/temporal-certs/client.pem
-          echo -n $TEMPORAL_CLIENT_KEY > /tmp/temporal-certs/client.key
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Create Certs Dir
+        run: node scripts/create-certs-dir.js
       - name: Check Workflow Compatiblity
-        run: node lib/check-compatibility.js
+        run: node lib/check-compatibility.js "${{ github.event.pull_request.title }}"
         env:
           TEMPORAL_ADDRESS: replay-versioning-demo.a2dd6.tmprl.cloud
           TEMPORAL_NAMESPACE: replay-versioning-demo.a2dd6
-          TEMPORAL_CLIENT_CERT: /tmp/temporal-certs/client.pem
-          TEMPORAL_CLIENT_KEY: /tmp/temporal-certs/client.key
+          TEMPORAL_TLS_CERT: /tmp/temporal-certs/client.pem
+          TEMPORAL_TLS_KEY: /tmp/temporal-certs/client.key
