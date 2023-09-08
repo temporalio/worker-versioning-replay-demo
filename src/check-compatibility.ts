@@ -53,6 +53,9 @@ async function run() {
     }
     // Limit the number of workflows to check as the query could potentially return a large number of results.
     if (++i > 10_000) break;
+    if (i % 1000 === 0) {
+      console.log(`${i} compatible`);
+    }
   }
   console.log("✅ all compatible");
   await connection.close();
