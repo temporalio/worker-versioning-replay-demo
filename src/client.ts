@@ -1,15 +1,19 @@
-import { Connection, Client } from '@temporalio/client';
+import { Connection, Client } from "@temporalio/client";
+import { getConnectionOptions, namespace } from "./env";
 
 async function run() {
-  const connection = await Connection.connect();
+  const connection = await Connection.connect(await getConnectionOptions());
   const client = new Client({
     connection,
+    namespace,
   });
 
-  const wfs = await client.workflow.list({ query: 'WorkflowType="versioningExample"' });
+  const wfs = client.workflow.list({
+    query: 'WorkflowType="versioningExample"',
+  });
   for await (const wf of wfs) {
-    const handle = await client.workflow.getHandle(wf.workflowId, wf.runId);
-    await handle.signal('proceed', 'go');
+    const handle = client.workflow.getHandle(wf.workflowId, wf.runId);
+    await handle.signal("proceed", "go");
   }
 }
 

@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import type * as client from "@temporalio/client";
+import type { WorkerOptions } from "@temporalio/worker";
 
 // Common set of connection options that can be used for both the client and worker connections.
 export type ConnectionOptions = Pick<
@@ -22,9 +23,9 @@ export async function getConnectionOptions(): Promise<ConnectionOptions> {
   const address = getenv("TEMPORAL_ADDRESS", "localhost:7233");
 
   let tls: ConnectionOptions["tls"] = undefined;
-  if (process.env.TEMPORAL_TLS_CERT_PATH) {
-    const crt = await fs.readFile(getenv("TEMPORAL_TLS_CERT_PATH"));
-    const key = await fs.readFile(getenv("TEMPORAL_TLS_KEY_PATH"));
+  if (process.env.TEMPORAL_TLS_CERT) {
+    const crt = await fs.readFile(getenv("TEMPORAL_TLS_CERT"));
+    const key = await fs.readFile(getenv("TEMPORAL_TLS_KEY"));
     tls = { clientCertPair: { crt, key } };
   }
   return {
@@ -32,3 +33,20 @@ export async function getConnectionOptions(): Promise<ConnectionOptions> {
     tls,
   };
 }
+
+export function getWorkflowOptions(): Pick<
+  WorkerOptions,
+  "workflowBundle" | "workflowsPath"
+> {
+  const workflowBundlePath = process.env.WORKFLOW_BUNDLE_PATH;
+  if (workflowBundlePath) {
+    return { workflowBundle: { codePath: workflowBundlePath } };
+  } else {
+    return { workflowsPath: require.resolve("./workflows") };
+  }
+}
+
+export const namespace = getenv("TEMPORAL_NAMESPACE", "default");
+// TODO: change for actual demo (avoids clutter created during tests)
+// export const taskQueue = "versioning-demo";
+export const taskQueue = "versioned-queue";

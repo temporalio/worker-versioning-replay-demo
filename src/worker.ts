@@ -1,40 +1,26 @@
-import path from "node:path";
-import {
-  NativeConnection,
-  Worker,
-  type WorkerOptions,
-} from "@temporalio/worker";
+import { NativeConnection, Worker } from "@temporalio/worker";
 import * as activities from "./activities";
-import { getenv, getConnectionOptions } from "./env";
+import {
+  getenv,
+  namespace,
+  taskQueue,
+  getConnectionOptions,
+  getWorkflowOptions,
+} from "./env";
 
 async function run() {
   const connectionOptions = await getConnectionOptions();
   const buildId = getenv("BUILD_ID");
-  const namespace = getenv("TEMPORAL_NAMESPACE", "default");
-
-  let workflowOptions: Partial<WorkerOptions>;
-  const workflowBundlePath = process.env.WORKFLOW_BUNDLE_PATH;
-  if (workflowBundlePath) {
-    workflowOptions = {
-      workflowBundle: {
-        codePath: path.resolve(__dirname, "..", "workflow-bundle.js"),
-      },
-    };
-  } else {
-    workflowOptions = {
-      workflowsPath: require.resolve("./workflows"),
-    };
-  }
 
   const connection = await NativeConnection.connect(connectionOptions);
   const worker = await Worker.create({
     connection,
     namespace,
-    taskQueue: "versioned-queue",
+    taskQueue,
     buildId,
     useVersioning: true,
     activities,
-    ...workflowOptions,
+    ...getWorkflowOptions(),
   });
   await worker.run();
   await connection.close();

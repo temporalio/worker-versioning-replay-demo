@@ -29,3 +29,26 @@ jobs:
           platforms: linux/amd64,linux/arm64
           build-args: |
             BUILD_ID=${{ github.run_id }}-${{ github.run_number }}
+  release-validation:
+    if: ${{ github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, '[compatible-')  }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - name: Create certs dir
+        # We write the certs to disk because it serves the sample
+        run: |
+          mkdirs /tmp/temporal-certs
+          echo -n $TEMPORAL_CLIENT_CERT > /tmp/temporal-certs/client.pem
+          echo -n $TEMPORAL_CLIENT_KEY > /tmp/temporal-certs/client.key
+      - name: Check Workflow Compatiblity
+        run: node lib/check-compatibility.js
+        env:
+          TEMPORAL_ADDRESS: replay-versioning-demo.a2dd6.tmprl.cloud
+          TEMPORAL_NAMESPACE: replay-versioning-demo.a2dd6
+          TEMPORAL_CLIENT_CERT: /tmp/temporal-certs/client.pem
+          TEMPORAL_CLIENT_KEY: /tmp/temporal-certs/client.key
