@@ -9,15 +9,18 @@ export const proceeder = workflow.defineSignal<[string]>("proceed");
 
 export async function versioningExample(): Promise<string> {
   workflow.log.info("Workflow V1 started, waiting for signal");
-  let shouldFinish = false;
-  workflow.setHandler(proceeder, async (input) => {
-    workflow.log.info("Workflow V1 got signal");
-    await greet("from V1 worker!");
+  let inputs = Array<string>();
+  workflow.setHandler(proceeder, (input) => void inputs.push(input));
+  while (true) {
+    await workflow.condition(() => inputs.length > 0);
+    const input = inputs.shift()!;
+
+    workflow.log.info("Workflow V1 got signal", { input });
+    await greet("from V1 workflow!");
     await workflow.sleep("1 second");
-    if (input === "finish") {
-      shouldFinish = true;
+
+    if (inputs.length === 0 && input === "finish") {
+      return "Concluded workflow on v1";
     }
-  });
-  await workflow.condition(() => shouldFinish);
-  return "Concluded workflow on v1";
+  }
 }
