@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Print Docker Build Tag
-        run: echo temporaliotest/replay-versioning-demo:${{ github.run_id }}-${{ github.run_number }}
+        run: echo temporaliotest/replay-versioning-demo:${{ github.run_id }}-${{ github.run_attempt }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -25,10 +25,10 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: temporaliotest/replay-versioning-demo:${{ github.run_id }}-${{ github.run_number }}
+          tags: temporaliotest/replay-versioning-demo:${{ github.run_id }}-${{ github.run_attempt }}
           platforms: linux/amd64,linux/arm64
           build-args: |
-            BUILD_ID=${{ github.run_id }}-${{ github.run_number }}
+            BUILD_ID=${{ github.run_id }}-${{ github.run_attempt }}
   release-validation:
     if: ${{ github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, '[compatible-')  }}
     runs-on: ubuntu-latest
