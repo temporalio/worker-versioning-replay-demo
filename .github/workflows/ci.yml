@@ -9,9 +9,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      BUILD_ID: ${{ github.run_id }}${{ github.run_attempt > 1 && format('-{0}',  github.run_attempt) || '' }}
     steps:
+      ### START: Generate pretty build ID
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        run: npm ci
+      - name: Generate Build ID
+        run: node scripts/generate-build-id.mjs ${{ github.run_id }} ${{ github.run_attempt }}
+      ### END: Generate pretty build ID
+
       - name: Print Docker Build Tag
         run: echo temporaliotest/replay-versioning-demo:$BUILD_ID
       - name: Set up QEMU
@@ -47,7 +56,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Create Certs Dir
-        run: node scripts/create-certs-dir.js
+        run: node scripts/create-certs-dir.mjs
       - name: Check Workflow Compatiblity
         run: node lib/check-compatibility.js "${{ github.event.pull_request.title }}"
         env:
