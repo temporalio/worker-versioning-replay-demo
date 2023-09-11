@@ -5,8 +5,8 @@
   "scripts": {
     "build": "tsc --build && node lib/create-bundle.js",
     "worker": "ts-node src/worker.ts",
-    "sender": "ts-node src/client.ts",
-    "finisher": "ts-node src/client-finish.ts"
+    "sender": "ts-node src/client.ts go",
+    "finisher": "ts-node src/client.ts finish"
   },
   "dependencies": {
     "@temporalio/activity": "^1.8.4",
