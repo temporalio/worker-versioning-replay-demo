@@ -47,6 +47,4 @@ export function getWorkflowOptions(): Pick<
 }
 
 export const namespace = getenv("TEMPORAL_NAMESPACE", "default");
-// TODO: change for actual demo (avoids clutter created during tests)
-// export const taskQueue = "versioning-demo";
-export const taskQueue = "versioned-queue";
+export const taskQueue = getenv("TEMPORAL_TASK_QUEUE", "versioned-queue");

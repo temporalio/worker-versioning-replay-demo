@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: temporaliotest/replay-versioning-demo
     steps:
       ### START: Generate pretty build ID
       - uses: actions/checkout@v3
@@ -22,7 +24,7 @@ jobs:
       ### END: Generate pretty build ID
 
       - name: Print Docker Build Tag
-        run: echo temporaliotest/replay-versioning-demo:$BUILD_ID
+        run: echo $IMAGE_NAME:$BUILD_ID
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -36,7 +38,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: temporaliotest/replay-versioning-demo:${{ env.BUILD_ID }}
+          tags: ${{ env.IMAGE_NAME }}:${{ env.BUILD_ID }}
           platforms: linux/amd64,linux/arm64
           build-args: |
             BUILD_ID=${{ env.BUILD_ID }}
