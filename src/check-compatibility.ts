@@ -32,7 +32,7 @@ async function run() {
   if (set == null) {
     throw new Error(`Could not find set that contains build ID: ${buildId}`);
   }
-  const joinedBuildIds = set.buildIds.map((b) => `"versioned-${b}"`).join(", ");
+  const joinedBuildIds = set.buildIds.map((b) => `"versioned:${b}"`).join(", ");
 
   // Based on your use case, you may want to construct a series of more complex queries to validate workflows from
   // different time ranges and different builds to diversify the coverage.
